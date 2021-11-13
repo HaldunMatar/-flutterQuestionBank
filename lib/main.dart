@@ -1,4 +1,15 @@
+import 'dart:convert' as convert;
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
+
+import 'package:question_bank/providers/question.dart';
+import 'package:question_bank/providers/questions.dart';
+import 'package:question_bank/widget/option.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,13 +61,23 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  int _itemCount = 10;
+
+  String _name = '';
+  String _option1 = '';
+  String _option2 = '';
+  String _option3 = '';
+  String _option4 = '';
+
   void _incrementCounter() {
+    //fetchQuestions();
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
+
       _counter++;
     });
   }
@@ -69,64 +90,125 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Card(
-              child: Text('question text1'),
-              color: Colors.amber,
-            ),
-            Row(
-              children: [
-                Card(
-                  child: Text('option1  text1'),
-                  color: Colors.greenAccent,
-                ),
-                Card(
-                  child: Text('option1  text2'),
-                  color: Colors.greenAccent,
-                ),
-                Card(
-                  child: Text('option1  text3'),
-                  color: Colors.greenAccent,
-                ),
-                Card(
-                  child: Text('option1  text4'),
-                  color: Colors.greenAccent,
-                ),
-              ],
-            ),
-            Card(
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text('gfgf'),
-              ),
-              color: Colors.red[300],
-            ),
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(
+            value: Questions(),
+          ),
+        ],
+        child: Consumer<Questions>(
+            builder: (ctx, questions, _) => Scaffold(
+                  appBar: AppBar(
+                    // Here we take the value from the MyHomePage object that was created by
+                    // the App.build method, and use it to set our appbar title.
+                    title: Text(widget.title),
+                  ),
+                  body: Center(
+                    // Center is a layout widget. It takes a single child and positions it
+                    // in the middle of the parent.
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        getQuestion(Text(
+                          questions.currenntQuestion.getName,
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        )),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    child: Option(
+                                      Text(
+                                        questions.currenntQuestion.option1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Option(
+                                      Text(
+                                        questions.currenntQuestion.option2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Option(
+                                      Text(
+                                        questions.currenntQuestion.option3,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Option(
+                                      Text(
+                                        questions.currenntQuestion.option4,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        Card(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Random rnd;
+                              int min = 0;
+                              int max = questions.listquestionId.length;
+                              rnd = new Random();
+                              int r = min + rnd.nextInt(max - min);
+                              print("$r is in the range of $min and $max");
+
+                              await questions
+                                  .fetchQuestion(questions.listquestionId[r]);
+                            },
+                            child: Text('next'),
+                          ),
+                          color: Colors.red[300],
+                        ),
+                        const Text(
+                          'You have pushed the button this many times:',
+                        ),
+                        Text(
+                          '$_itemCount',
+                          style: Theme.of(context).textTheme.headline4,
+                        ),
+                      ],
+                    ),
+                  ),
+                  floatingActionButton: FloatingActionButton(
+                    onPressed: () {
+                      questions.fetchQuestion(76);
+                    },
+                    tooltip: 'Increment',
+                    child: const Icon(Icons.add),
+                  ), // This trailing comma makes auto-formatting nicer for build methods.
+                )));
+  }
+
+  Widget getQuestion(Widget widget) {
+    return Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
         ),
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: widget,
+        ),
+        color: Colors.pink,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
