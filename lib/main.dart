@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
+import 'package:question_bank/providers/competition.dart';
 
 import 'package:question_bank/providers/question.dart';
 import 'package:question_bank/providers/questions.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Competition',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Competition'),
     );
   }
 }
@@ -95,6 +96,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ChangeNotifierProvider.value(
             value: Questions(),
           ),
+          ChangeNotifierProvider.value(
+            value: Competition(),
+          ),
         ],
         child: Consumer<Questions>(
             builder: (ctx, questions, _) => Scaffold(
@@ -111,7 +115,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: <Widget>[
                         getQuestion(Text(
                           questions.currenntQuestion.getName,
-                          style: TextStyle(fontSize: 20, color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.right,
+                          textDirection: TextDirection.rtl,
                         )),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -122,37 +131,49 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Expanded(
                                   child: Container(
                                     child: Option(
-                                      Text(
-                                        questions.currenntQuestion.option1,
-                                      ),
-                                    ),
+                                        Text(
+                                          questions.currenntQuestion.option1,
+                                          textAlign: TextAlign.right,
+                                          textDirection: TextDirection.rtl,
+                                        ),
+                                        1,
+                                        questions.checkAnswerAndSetPoint),
                                   ),
                                 ),
                                 Expanded(
                                   child: Container(
                                     child: Option(
-                                      Text(
-                                        questions.currenntQuestion.option2,
-                                      ),
-                                    ),
+                                        Text(
+                                          questions.currenntQuestion.option2,
+                                          textAlign: TextAlign.right,
+                                          textDirection: TextDirection.rtl,
+                                        ),
+                                        2,
+                                        questions.checkAnswerAndSetPoint),
                                   ),
                                 ),
                                 Expanded(
                                   child: Container(
                                     child: Option(
-                                      Text(
-                                        questions.currenntQuestion.option3,
-                                      ),
-                                    ),
+                                        Text(
+                                          questions.currenntQuestion.option3,
+                                          textAlign: TextAlign.right,
+                                          textDirection: TextDirection.rtl,
+                                        ),
+                                        3,
+                                        questions.checkAnswerAndSetPoint),
                                   ),
                                 ),
                                 Expanded(
                                   child: Container(
                                     child: Option(
-                                      Text(
-                                        questions.currenntQuestion.option4,
-                                      ),
-                                    ),
+                                        Text(
+                                          questions.currenntQuestion.option4,
+                                          textAlign: TextAlign.center,
+                                          textDirection: TextDirection.rtl,
+                                        ),
+                                        4,
+                                        questions.checkAnswerAndSetPoint),
                                   ),
                                 )
                               ],
@@ -162,25 +183,27 @@ class _MyHomePageState extends State<MyHomePage> {
                         Card(
                           child: ElevatedButton(
                             onPressed: () async {
-                              Random rnd;
-                              int min = 0;
-                              int max = questions.listquestionId.length;
-                              rnd = new Random();
-                              int r = min + rnd.nextInt(max - min);
-                              print("$r is in the range of $min and $max");
-
-                              await questions
-                                  .fetchQuestion(questions.listquestionId[r]);
+                              await fetchQuestion(questions);
                             },
                             child: Text('next'),
                           ),
-                          color: Colors.red[300],
+                          // color: Colors.red[300],
                         ),
-                        const Text(
-                          'You have pushed the button this many times:',
+                        Card(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await questions.newCompetition();
+                            },
+                            child: Text('New'),
+                          ),
+                          // color: Colors.red[300],
                         ),
                         Text(
-                          '$_itemCount',
+                          questions.numQuestion.toString(),
+                          style: Theme.of(context).textTheme.headline4,
+                        ),
+                        Text(
+                          questions.numPoints.toString(),
                           style: Theme.of(context).textTheme.headline4,
                         ),
                       ],
@@ -188,12 +211,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   floatingActionButton: FloatingActionButton(
                     onPressed: () {
-                      questions.fetchQuestion(76);
+                      fetchQuestion(questions);
                     },
                     tooltip: 'Increment',
                     child: const Icon(Icons.add),
                   ), // This trailing comma makes auto-formatting nicer for build methods.
                 )));
+  }
+
+  Future<void> fetchQuestion(Questions questions) async {
+    print(" is in the range of $min and $max");
+    if (questions.currenntQuestion.isAnswered) {
+      await questions.fetchQuestion();
+    }
   }
 
   Widget getQuestion(Widget widget) {
@@ -205,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(14.0),
-          child: widget,
+          child: Center(child: widget),
         ),
         color: Colors.pink,
       ),

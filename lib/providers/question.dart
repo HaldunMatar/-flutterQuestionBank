@@ -14,6 +14,7 @@ class Question with ChangeNotifier {
   String option4;
 
   String? answer;
+  bool isAnswered = false;
 
   Question({
     required this.id,
@@ -24,6 +25,15 @@ class Question with ChangeNotifier {
     required this.option4,
     this.answer,
   });
+
+  bool checkAnswer(int numberOfOption) {
+    isAnswered = true;
+    if (numberOfOption.toString() == answer) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   static Question getBlackQuestion() {
     return Question(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,10 @@ class Questions with ChangeNotifier {
   List<int> listquestionId = [];
   late Question currenntQuestion;
   static const basicUrl = '10.0.2.2:8081';
+
+  int numQuestion = 0;
+  int numPoints = 0;
+  int second = 1;
 
   Questions() {
     currenntQuestion = Question.getBlackQuestion();
@@ -35,7 +40,7 @@ class Questions with ChangeNotifier {
             convert.jsonDecode(responRes.body) as List<dynamic>;
 
         _itemCount = jsonResponRes.length;
-        print('length is  ${_itemCount}');
+        //  print('length is  ${_itemCount}');
 
         listquestionId =
             jsonResponRes.map<dynamic>((e) => e['id']).cast<int>().toList();
@@ -51,13 +56,30 @@ class Questions with ChangeNotifier {
       print(error.toString());
       // throw (error);
     }
+
+    fetchQuestion();
+
     return listquestionId;
   }
 
-  Future<void> fetchQuestion(int id) async {
+  icreaseNumQuestion() {
+    numQuestion++;
+  }
+
+  Future<void> fetchQuestion() async {
+    if (numQuestion >= 10) return;
     late Question question;
-    print('fetchQuestion fetchQuestion ');
-    var url = Uri.http(basicUrl, '/questions/${id}');
+    Random rnd;
+    int min = 0;
+    int max = listquestionId.length;
+    rnd = new Random();
+    int r = min + rnd.nextInt(max - min);
+    // print("$r is in the range of $min and $max");
+
+    //await questions.fetchQuestion(questions.listquestionId[r]);
+
+    // print('fetchQuestion fetchQuestion ');
+    var url = Uri.http(basicUrl, '/questions/${listquestionId[r]}');
     List<int>? listQuestionId = null;
     try {
       var responRes = await http.get(url);
@@ -67,7 +89,7 @@ class Questions with ChangeNotifier {
             convert.jsonDecode(utf8.decode(responRes.bodyBytes)) as Map;
 
         //currenntQuestion = jsonResponRes as Quest;
-        print('name name name     ${jsonResponRes['name']}');
+        //  print('name name name     ${jsonResponRes['name']}');
 
         question = Question(
             id: jsonResponRes['id'],
@@ -75,6 +97,7 @@ class Questions with ChangeNotifier {
             option1: jsonResponRes['option1'],
             option2: jsonResponRes['option2'],
             option3: jsonResponRes['option3'],
+            answer: jsonResponRes['answer'],
             option4: jsonResponRes['option4']);
       } else {
         print('there is errr in request with state ${responRes.statusCode}');
@@ -87,6 +110,25 @@ class Questions with ChangeNotifier {
       // throw (error);
     }
     currenntQuestion = question;
+    icreaseNumQuestion();
     notifyListeners();
+  }
+
+  newCompetition() {
+    numQuestion = 1;
+    numPoints = 0;
+    notifyListeners();
+  }
+
+  bool checkAnswerAndSetPoint(int numberOfOption) {
+    bool res = currenntQuestion.checkAnswer(numberOfOption);
+    // print(' befor numPoints$numPoints');
+    if (res) {
+      numPoints = numPoints + 10;
+      //  print('after numPoints$numPoints');
+      // notifyListeners();
+    }
+
+    return res;
   }
 }
