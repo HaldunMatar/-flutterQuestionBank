@@ -41,10 +41,13 @@ class _OptionState extends State<Option> {
                 setState(() {
                   widget.bgColor = Colors.green;
                 });
+
+                
               } else {
                 setState(() {
                   widget.bgColor = Colors.red;
                 });
+              
               }
             },
           ),

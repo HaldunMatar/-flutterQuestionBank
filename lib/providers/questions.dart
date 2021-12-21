@@ -11,13 +11,15 @@ class Questions with ChangeNotifier {
   int _itemCount = 0;
   List<int> listquestionId = [];
   late Question currenntQuestion;
-  static const basicUrl = '10.0.2.2:8081';
+  static const basicUrl =
+      'questionsbank-env.eba-cpsjg2rt.us-east-2.elasticbeanstalk.com';
 
   int numQuestion = 0;
   int numPoints = 0;
   int second = 1;
 
   Questions() {
+    print('Questions Questions');
     currenntQuestion = Question.getBlackQuestion();
     fetchQuestions();
   }
@@ -26,6 +28,7 @@ class Questions with ChangeNotifier {
     print(
         'fetchQuestions fetchQuestions fetchQuestions fetchQuestions fetchQuestions');
     var url = Uri.http(basicUrl, '/questions/');
+
     List<int>? listQuestionId = null;
 
     //var url = Uri.http('10.0.2.2:8081', '/questions/id/');
@@ -34,13 +37,13 @@ class Questions with ChangeNotifier {
 
     try {
       var responRes = await http.get(url);
-
+      print('fetchQuestions is fetchQuestions');
       if (responRes.statusCode == 200) {
         final jsonResponRes =
             convert.jsonDecode(responRes.body) as List<dynamic>;
 
         _itemCount = jsonResponRes.length;
-        //  print('length is  ${_itemCount}');
+        print('length is  ${_itemCount}');
 
         listquestionId =
             jsonResponRes.map<dynamic>((e) => e['id']).cast<int>().toList();

@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Competition',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -220,7 +221,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> fetchQuestion(Questions questions) async {
-    print(" is in the range of $min and $max");
+    print(" is in the range of");
+    print(" is in the range of ");
     if (questions.currenntQuestion.isAnswered) {
       await questions.fetchQuestion();
     }
